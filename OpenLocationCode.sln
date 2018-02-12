@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLocationCode", "OpenLocationCode\OpenLocationCode.csproj", "{A9C637D5-A73C-4DD3-A6C9-C68FECF717DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenLocationCodeTest", "OpenLocationCodeTest\OpenLocationCodeTest.csproj", "{426A09CB-AC1A-4F0E-973E-3AFB130A6E45}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A9C637D5-A73C-4DD3-A6C9-C68FECF717DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9C637D5-A73C-4DD3-A6C9-C68FECF717DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9C637D5-A73C-4DD3-A6C9-C68FECF717DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9C637D5-A73C-4DD3-A6C9-C68FECF717DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{426A09CB-AC1A-4F0E-973E-3AFB130A6E45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{426A09CB-AC1A-4F0E-973E-3AFB130A6E45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{426A09CB-AC1A-4F0E-973E-3AFB130A6E45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{426A09CB-AC1A-4F0E-973E-3AFB130A6E45}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

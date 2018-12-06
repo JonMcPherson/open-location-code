@@ -32,8 +32,22 @@ public static class ValidityTest {
         public void ShouldTestValidityOfACode() {
             foreach (TestData testData in testDataList) {
                 Assert.True(testData.IsValid == OpenLocationCode.IsValidCode(testData.Code),
-                            $"Validity of code {testData.Code} is wrong.");
+                    $"Validity of code {testData.Code} is wrong.");
             }
+        }
+
+        [Fact]
+        public void ShouldValidateCodesExceedingMaximumLength() {
+            string code = OpenLocationCode.Encode(51.3701125, -10.202665625, 1000000);
+            Assert.True(OpenLocationCode.IsValidCode(code), "Code should be valid.");
+
+            // Extend the code with a valid character and make sure it is still valid.
+            Assert.True(OpenLocationCode.IsValidCode(code + "W"),
+                "Too long code with all valid characters should be valid.");
+
+            // Extend the code with an invalid character and make sure it is invalid.
+            Assert.False(OpenLocationCode.IsValidCode(code + "U"),
+                "Too long code with invalid character should be invalid.");
         }
     }
 
@@ -42,7 +56,7 @@ public static class ValidityTest {
         public void ShouldTestShortnessOfACode() {
             foreach (TestData testData in testDataList) {
                 Assert.True(testData.IsShort == OpenLocationCode.IsShortCode(testData.Code),
-                            $"Shortness of code {testData.Code} is wrong.");
+                    $"Shortness of code {testData.Code} is wrong.");
             }
         }
     }
@@ -52,7 +66,7 @@ public static class ValidityTest {
         public void ShouldTestFullnessOfACode() {
             foreach (TestData testData in testDataList) {
                 Assert.True(testData.IsFull == OpenLocationCode.IsFullCode(testData.Code),
-                            $"Fullness of code {testData.Code} is wrong.");
+                    $"Fullness of code {testData.Code} is wrong.");
             }
         }
     }

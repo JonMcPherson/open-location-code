@@ -35,22 +35,30 @@ public class EncodingTest {
                     codeLength = testData.Code.IndexOf("0");
                 }
                 Assert.True(testData.Code == OpenLocationCode.Encode(testData.Lat, testData.Lon, codeLength),
-                            $"Latitude {testData.Lat} and longitude {testData.Lon} were wrongly encoded.");
+                    $"Latitude {testData.Lat} and longitude {testData.Lon} were wrongly encoded.");
             }
         }
 
         [Fact]
         public void ShouldClipCoordinatesWhenExceedingMaximum() {
             Assert.True(OpenLocationCode.Encode(-90, 5) == OpenLocationCode.Encode(-91, 5),
-                        "Clipping of negative latitude doesn't work.");
+                "Clipping of negative latitude doesn't work.");
             Assert.True(OpenLocationCode.Encode(90, 5) == OpenLocationCode.Encode(91, 5),
-                        "Clipping of positive latitude doesn't work.");
+                "Clipping of positive latitude doesn't work.");
             Assert.True(OpenLocationCode.Encode(5, 175) == OpenLocationCode.Encode(5, -185),
-                        "Clipping of negative longitude doesn't work.");
+                "Clipping of negative longitude doesn't work.");
             Assert.True(OpenLocationCode.Encode(5, 175) == OpenLocationCode.Encode(5, -905),
-                        "Clipping of very long negative longitude doesn't work.");
+                "Clipping of very long negative longitude doesn't work.");
             Assert.True(OpenLocationCode.Encode(5, -175) == OpenLocationCode.Encode(5, 905),
-                        "Clipping of very long positive longitude doesn't work.");
+                "Clipping of very long positive longitude doesn't work.");
+        }
+
+        [Fact]
+        public void ShouldLimitCodeLengthWhenExceedingMaximum() {
+            string code = OpenLocationCode.Encode(51.3701125, -10.202665625, 1000000);
+
+            Assert.True(code.Length == OpenLocationCode.MaxCodeLength + 1,
+                "Encoded code should have a length of MaxCodeLength + 1 for the plus symbol");
         }
     }
 
@@ -61,13 +69,13 @@ public class EncodingTest {
                 var decoded = OpenLocationCode.Decode(testData.Code);
 
                 Assert.True(IsNear(testData.DecodedLatLo, decoded.SouthLatitude),
-                            $"Wrong low latitude for code {testData.Code}");
+                    $"Wrong low latitude for code {testData.Code}");
                 Assert.True(IsNear(testData.DecodedLatHi, decoded.NorthLatitude),
-                            $"Wrong high latitude for code {testData.Code}");
+                    $"Wrong high latitude for code {testData.Code}");
                 Assert.True(IsNear(testData.DecodedLonLo, decoded.WestLongitude),
-                            $"Wrong low longitude for code {testData.Code}");
+                    $"Wrong low longitude for code {testData.Code}");
                 Assert.True(IsNear(testData.DecodedLonHi, decoded.EastLongitude),
-                            $"Wrong high longitude for code {testData.Code}");
+                    $"Wrong high longitude for code {testData.Code}");
             }
         }
 
@@ -77,15 +85,15 @@ public class EncodingTest {
                 var olc = new OpenLocationCode(testData.Code);
                 var decoded = olc.Decode();
                 Assert.True(olc.Contains(decoded.CenterLatitude, decoded.CenterLongitude),
-                            $"Containment relation is broken for the decoded middle point of code {testData.Code}");
+                    $"Containment relation is broken for the decoded middle point of code {testData.Code}");
                 Assert.True(olc.Contains(decoded.SouthLatitude, decoded.WestLongitude),
-                            $"Containment relation is broken for the decoded bottom left corner of code {testData.Code}");
+                    $"Containment relation is broken for the decoded bottom left corner of code {testData.Code}");
                 Assert.False(olc.Contains(decoded.NorthLatitude, decoded.EastLongitude),
-                             $"Containment relation is broken for the decoded top right corner of code {testData.Code}");
+                    $"Containment relation is broken for the decoded top right corner of code {testData.Code}");
                 Assert.False(olc.Contains(decoded.SouthLatitude, decoded.EastLongitude),
-                             $"Containment relation is broken for the decoded bottom right corner of code {testData.Code}");
+                    $"Containment relation is broken for the decoded bottom right corner of code {testData.Code}");
                 Assert.False(olc.Contains(decoded.NorthLatitude, decoded.WestLongitude),
-                             $"Containment relation is broken for the decoded top left corner of code {testData.Code}");
+                    $"Containment relation is broken for the decoded top left corner of code {testData.Code}");
             }
         }
 

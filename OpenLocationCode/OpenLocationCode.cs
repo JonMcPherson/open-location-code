@@ -33,8 +33,11 @@ namespace Google.OpenLocationCode {
         // The maximum value for longitude in degrees.
         private static readonly int LongitudeMax = 180;
 
-        // Maxiumum code length using just lat/lng pair encoding.
+        // Maximum code length using just lat/lng pair encoding.
         private static readonly int PairCodeLength = 10;
+
+        // Maximum code length for any plus code
+        public static readonly int MaxCodeLength = 15;
 
         // Number of columns in the grid refinement method.
         private static readonly int GridColumns = 4;
@@ -63,6 +66,8 @@ namespace Google.OpenLocationCode {
         /// <param name="codeLength">The desired number of digits in the code.</param>
         /// <exception cref="ArgumentException">If the code lenght is not valid.</exception>
         public OpenLocationCode(double latitude, double longitude, int codeLength) {
+            // Limit the maximum number of digits in the code.
+            codeLength = Math.Min(codeLength, MaxCodeLength);
             // Check that the code length requested is valid.
             if (codeLength < 4 || (codeLength < PairCodeLength && codeLength % 2 == 1)) {
                 throw new ArgumentException("Illegal code length " + codeLength);
@@ -134,7 +139,6 @@ namespace Google.OpenLocationCode {
         public OpenLocationCode(double latitude, double longitude) : this(latitude, longitude, CodePrecisionNormal) { }
 
 
-
         /// <summary>
         /// Returns the string representation of the code.
         /// </summary>
@@ -177,6 +181,7 @@ namespace Google.OpenLocationCode {
             }
             // Strip padding and separator characters out of the code.
             string decoded = Code.Replace(Separator.ToString(), "").Replace(PaddingCharacter.ToString(), "");
+            int decodedCodeLength = Math.Min(decoded.Length, MaxCodeLength);
 
             int digit = 0;
             // The precisions are initially set to ENCODING_BASE^2 because they will be immediately divided.
@@ -187,7 +192,7 @@ namespace Google.OpenLocationCode {
             decimal westLongitude = 0;
 
             // Decode the digits.
-            while (digit < decoded.Length) {
+            while (digit < decodedCodeLength) {
                 if (digit < PairCodeLength) {
                     // Decode a pair of digits, the first being latitude and the second being longitude.
                     latPrecision /= EncodingBase;
@@ -293,7 +298,7 @@ namespace Google.OpenLocationCode {
             double range = Math.Max(
                 Math.Abs(referenceLatitude - codeArea.CenterLatitude),
                 Math.Abs(referenceLongitude - codeArea.CenterLongitude)
-           );
+            );
             // We are going to check to see if we can remove three pairs, two pairs or just one pair of
             // digits from the code.
             for (int i = 4; i >= 1; i--) {

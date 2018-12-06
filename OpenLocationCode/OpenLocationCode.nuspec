@@ -2,14 +2,14 @@
 <package>
   <metadata>
     <id>OpenLocationCode</id>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <title>OpenLocationCode</title>
     <authors>Jon McPherson</authors>
     <owners>JonMcPherson</owners>
     <licenseUrl>https://github.com/google/open-location-code/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/JonMcPherson/open-location-code</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>A C# (.NET Standard) implementation of the Google Open Location Code API.</description>
+    <description>The C# (.NET Standard) implementation of the Google Open Location Code API.</description>
     <tags>google open location code plus codes latitude longitude encode decode</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0" />

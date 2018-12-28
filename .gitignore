@@ -7,7 +7,9 @@
 packages/
 TestResults/
 
+# IDEs
 .vs/
+.idea/
 
 # globs
 Makefile.in

@@ -3,8 +3,8 @@ using Google.OpenLocationCode;
 using Xunit;
 
 public static class ShorteningTest {
-
-    private static readonly List<TestData> testDataList = new List<TestData> {
+    
+    private static readonly List<TestData> TestDataList = new List<TestData> {
         new TestData("9C3W9QCJ+2VX", 51.3701125, -1.217765625, "+2VX", "B"),
         // Adjust so we can't trim by 8 (+/- .000755)
         new TestData("9C3W9QCJ+2VX", 51.3708675, -1.217765625, "CJ+2VX", "B"),
@@ -36,7 +36,7 @@ public static class ShorteningTest {
     public class TheShortenMethod {
         [Fact]
         public void ShouldShortenLongCodeToShortCodeFromReferencePoint() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 if (testData.TestType != "B" && testData.TestType != "S") {
                     continue;
                 }
@@ -50,7 +50,7 @@ public static class ShorteningTest {
     public class TheRecoverMethod {
         [Fact]
         public void ShouldRecoverShortCodeToLongCodeFromReferencePoint() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 if (testData.TestType != "B" && testData.TestType != "R") {
                     continue;
                 }

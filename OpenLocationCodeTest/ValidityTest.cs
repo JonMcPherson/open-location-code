@@ -4,7 +4,7 @@ using Xunit;
 
 public static class ValidityTest {
 
-    private static readonly List<TestData> testDataList = new List<TestData> {
+    private static readonly List<TestData> TestDataList = new List<TestData> {
         new TestData("8FWC2345+G6", true, false, true),
         new TestData("8FWC2345+G6G", true, false, true),
         new TestData("8fwc2345+", true, false, true),
@@ -30,7 +30,7 @@ public static class ValidityTest {
     public class TheIsValidCodeMethod {
         [Fact]
         public void ShouldTestValidityOfACode() {
-            foreach (TestData testData in testDataList) {
+            foreach (TestData testData in TestDataList) {
                 Assert.True(testData.IsValid == OpenLocationCode.IsValidCode(testData.Code),
                     $"Validity of code {testData.Code} is wrong.");
             }
@@ -54,7 +54,7 @@ public static class ValidityTest {
     public class TheIsShortCodeMethod {
         [Fact]
         public void ShouldTestShortnessOfACode() {
-            foreach (TestData testData in testDataList) {
+            foreach (TestData testData in TestDataList) {
                 Assert.True(testData.IsShort == OpenLocationCode.IsShortCode(testData.Code),
                     $"Shortness of code {testData.Code} is wrong.");
             }
@@ -64,7 +64,7 @@ public static class ValidityTest {
     public class TheIsFullCodeMethod {
         [Fact]
         public void ShouldTestFullnessOfACode() {
-            foreach (TestData testData in testDataList) {
+            foreach (TestData testData in TestDataList) {
                 Assert.True(testData.IsFull == OpenLocationCode.IsFullCode(testData.Code),
                     $"Fullness of code {testData.Code} is wrong.");
             }

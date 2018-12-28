@@ -5,7 +5,7 @@ using Xunit;
 
 public class EncodingTest {
 
-    private static readonly List<TestData> testDataList = new List<TestData> {
+    private static readonly List<TestData> TestDataList = new List<TestData> {
         new TestData("7FG49Q00+", 20.375, 2.775, 20.35, 2.75, 20.4, 2.8),
         new TestData("7FG49QCJ+2V", 20.3700625, 2.7821875, 20.37, 2.782125, 20.370125, 2.78225),
         new TestData("7FG49QCJ+2VX", 20.3701125, 2.782234375, 20.3701, 2.78221875, 20.370125, 2.78225),
@@ -29,7 +29,7 @@ public class EncodingTest {
     public class TheEncodeMethod {
         [Fact]
         public void ShouldEncodePointToLocationCode() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 int codeLength = testData.Code.Length - 1;
                 if (testData.Code.Contains("0")) {
                     codeLength = testData.Code.IndexOf("0");
@@ -65,7 +65,7 @@ public class EncodingTest {
     public class TheDecodeMethod {
         [Fact]
         public void ShouldDecodeLocationCodeToExpectedCodeArea() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 var decoded = OpenLocationCode.Decode(testData.Code);
 
                 Assert.True(IsNear(testData.DecodedLatLo, decoded.SouthLatitude),
@@ -81,7 +81,7 @@ public class EncodingTest {
 
         [Fact]
         public void ShouldDecodeToCodeAreaWithValidContainmentRelation() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 var olc = new OpenLocationCode(testData.Code);
                 var decoded = olc.Decode();
                 Assert.True(olc.Contains(decoded.CenterLatitude, decoded.CenterLongitude),

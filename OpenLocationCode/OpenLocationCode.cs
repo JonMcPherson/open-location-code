@@ -70,7 +70,7 @@ namespace Google.OpenLocationCode {
             codeLength = Math.Min(codeLength, MaxCodeLength);
             // Check that the code length requested is valid.
             if (codeLength < 4 || (codeLength < PairCodeLength && codeLength % 2 == 1)) {
-                throw new ArgumentException("Illegal code length " + codeLength);
+                throw new ArgumentException($"Illegal code length {codeLength}.");
             }
             // Ensure that latitude and longitude are valid.
             latitude = ClipLatitude(latitude);
@@ -177,7 +177,7 @@ namespace Google.OpenLocationCode {
         /// <exception cref="InvalidOperationException">If this code is not full.</exception>
         public CodeArea Decode() {
             if (!IsFullCode(Code)) {
-                throw new InvalidOperationException($"Method Decode() could only be called on valid full codes, code was {Code}.");
+                throw new InvalidOperationException($"Method {nameof(Decode)}() may only be called on a full code, code was {Code}.");
             }
             // Strip padding and separator characters out of the code.
             string decoded = Code.Replace(Separator.ToString(), "").Replace(PaddingCharacter.ToString(), "");
@@ -288,10 +288,10 @@ namespace Google.OpenLocationCode {
         /// <exception cref="ArgumentException">If the reference point is too far from this code's center point.</exception>
         public OpenLocationCode Shorten(double referenceLatitude, double referenceLongitude) {
             if (!IsFull()) {
-                throw new InvalidOperationException("Shorten() method could only be called on a full code.");
+                throw new InvalidOperationException($"Method {nameof(Shorten)}() may only be called on a full code.");
             }
             if (IsPadded()) {
-                throw new InvalidOperationException("Shorten() method can not be called on a padded code.");
+                throw new InvalidOperationException($"Method {nameof(Shorten)}() may not be called on a padded code.");
             }
 
             CodeArea codeArea = Decode();

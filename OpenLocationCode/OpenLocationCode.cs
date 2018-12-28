@@ -52,7 +52,7 @@ namespace Google.OpenLocationCode {
         /// <param name="code">A valid OLC code. Can be a full code or a shortened code.</param>
         /// <exception cref="ArgumentException">If the code is not valid.</exception>
         public OpenLocationCode(string code) {
-            if (!IsValidCode(code.ToUpper())) {
+            if (!IsValidCode(code)) {
                 throw new ArgumentException($"The provided code '{code}' is not a valid Open Location Code.");
             }
             Code = code.ToUpper();

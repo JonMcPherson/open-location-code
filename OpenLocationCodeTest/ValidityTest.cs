@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Google.OpenLocationCode;
-using Xunit;
+using NUnit.Framework;
 
 public static class ValidityTest {
 
@@ -28,15 +28,15 @@ public static class ValidityTest {
 
 
     public class TheIsValidCodeMethod {
-        [Fact]
+        [Test]
         public void ShouldTestValidityOfACode() {
             foreach (TestData testData in TestDataList) {
-                Assert.True(testData.IsValid == OpenLocationCode.IsValidCode(testData.Code),
+                Assert.AreEqual(testData.IsValid, OpenLocationCode.IsValidCode(testData.Code),
                     $"Validity of code {testData.Code} is wrong.");
             }
         }
 
-        [Fact]
+        [Test]
         public void ShouldValidateCodesExceedingMaximumLength() {
             string code = OpenLocationCode.Encode(51.3701125, -10.202665625, 1000000);
             Assert.True(OpenLocationCode.IsValidCode(code), "Code should be valid.");
@@ -52,20 +52,20 @@ public static class ValidityTest {
     }
 
     public class TheIsShortCodeMethod {
-        [Fact]
+        [Test]
         public void ShouldTestShortnessOfACode() {
             foreach (TestData testData in TestDataList) {
-                Assert.True(testData.IsShort == OpenLocationCode.IsShortCode(testData.Code),
+                Assert.AreEqual(testData.IsShort, OpenLocationCode.IsShortCode(testData.Code),
                     $"Shortness of code {testData.Code} is wrong.");
             }
         }
     }
 
     public class TheIsFullCodeMethod {
-        [Fact]
+        [Test]
         public void ShouldTestFullnessOfACode() {
             foreach (TestData testData in TestDataList) {
-                Assert.True(testData.IsFull == OpenLocationCode.IsFullCode(testData.Code),
+                Assert.AreEqual(testData.IsFull, OpenLocationCode.IsFullCode(testData.Code),
                     $"Fullness of code {testData.Code} is wrong.");
             }
         }

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Google.OpenLocationCode;
-using Xunit;
+using NUnit.Framework;
 
-public class EncodingTest {
+public static class EncodingTest {
 
     private static readonly List<TestData> TestDataList = new List<TestData> {
         new TestData("7FG49Q00+", 20.375, 2.775, 20.35, 2.75, 20.4, 2.8),
@@ -27,43 +27,43 @@ public class EncodingTest {
     };
 
     public class TheEncodeMethod {
-        [Fact]
+        [Test]
         public void ShouldEncodePointToLocationCode() {
             foreach (var testData in TestDataList) {
                 int codeLength = testData.Code.Length - 1;
                 if (testData.Code.Contains("0")) {
                     codeLength = testData.Code.IndexOf("0");
                 }
-                Assert.True(testData.Code == OpenLocationCode.Encode(testData.Lat, testData.Lon, codeLength),
+                Assert.AreEqual(testData.Code, OpenLocationCode.Encode(testData.Lat, testData.Lon, codeLength),
                     $"Latitude {testData.Lat} and longitude {testData.Lon} were wrongly encoded.");
             }
         }
 
-        [Fact]
+        [Test]
         public void ShouldClipCoordinatesWhenExceedingMaximum() {
-            Assert.True(OpenLocationCode.Encode(-90, 5) == OpenLocationCode.Encode(-91, 5),
+            Assert.AreEqual(OpenLocationCode.Encode(-90, 5), OpenLocationCode.Encode(-91, 5),
                 "Clipping of negative latitude doesn't work.");
-            Assert.True(OpenLocationCode.Encode(90, 5) == OpenLocationCode.Encode(91, 5),
+            Assert.AreEqual(OpenLocationCode.Encode(90, 5), OpenLocationCode.Encode(91, 5),
                 "Clipping of positive latitude doesn't work.");
-            Assert.True(OpenLocationCode.Encode(5, 175) == OpenLocationCode.Encode(5, -185),
+            Assert.AreEqual(OpenLocationCode.Encode(5, 175), OpenLocationCode.Encode(5, -185),
                 "Clipping of negative longitude doesn't work.");
-            Assert.True(OpenLocationCode.Encode(5, 175) == OpenLocationCode.Encode(5, -905),
+            Assert.AreEqual(OpenLocationCode.Encode(5, 175), OpenLocationCode.Encode(5, -905),
                 "Clipping of very long negative longitude doesn't work.");
-            Assert.True(OpenLocationCode.Encode(5, -175) == OpenLocationCode.Encode(5, 905),
+            Assert.AreEqual(OpenLocationCode.Encode(5, -175), OpenLocationCode.Encode(5, 905),
                 "Clipping of very long positive longitude doesn't work.");
         }
 
-        [Fact]
+        [Test]
         public void ShouldLimitCodeLengthWhenExceedingMaximum() {
             string code = OpenLocationCode.Encode(51.3701125, -10.202665625, 1000000);
 
-            Assert.True(code.Length == OpenLocationCode.MaxCodeLength + 1,
+            Assert.AreEqual(code.Length, OpenLocationCode.MaxCodeLength + 1,
                 "Encoded code should have a length of MaxCodeLength + 1 for the plus symbol");
         }
     }
 
     public class TheDecodeMethod {
-        [Fact]
+        [Test]
         public void ShouldDecodeLocationCodeToExpectedCodeArea() {
             foreach (var testData in TestDataList) {
                 var decoded = OpenLocationCode.Decode(testData.Code);
@@ -79,7 +79,7 @@ public class EncodingTest {
             }
         }
 
-        [Fact]
+        [Test]
         public void ShouldDecodeToCodeAreaWithValidContainmentRelation() {
             foreach (var testData in TestDataList) {
                 var olc = new OpenLocationCode(testData.Code);
@@ -97,20 +97,22 @@ public class EncodingTest {
             }
         }
 
-        [Fact]
+        [Test]
         public void ShouldDecodeToCodeAreaWithExpectedDimensions() {
-            Assert.Equal(OpenLocationCode.Decode("67000000+").LongitudeWidth, 20.0, 0);
-            Assert.Equal(OpenLocationCode.Decode("67000000+").LatitudeHeight, 20.0, 0);
-            Assert.Equal(OpenLocationCode.Decode("67890000+").LongitudeWidth, 1.0, 0);
-            Assert.Equal(OpenLocationCode.Decode("67890000+").LatitudeHeight, 1.0, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CF00+").LongitudeWidth, 0.05, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CF00+").LatitudeHeight, 0.05, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CFGH+").LongitudeWidth, 0.0025, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CFGH+").LatitudeHeight, 0.0025, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CFGH+JM").LongitudeWidth, 0.000125, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CFGH+JM").LatitudeHeight, 0.000125, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CFGH+JMP").LongitudeWidth, 0.00003125, 0);
-            Assert.Equal(OpenLocationCode.Decode("6789CFGH+JMP").LatitudeHeight, 0.000025, 0);
+            Assert.AreEqual(20.0, OpenLocationCode.Decode("67000000+").LongitudeWidth, 0);
+            Assert.AreEqual(20.0, OpenLocationCode.Decode("67000000+").LatitudeHeight, 0);
+            Assert.AreEqual(1.0, OpenLocationCode.Decode("67890000+").LongitudeWidth, 0);
+            Assert.AreEqual(1.0, OpenLocationCode.Decode("67890000+").LatitudeHeight, 0);
+            Assert.AreEqual(0.05, OpenLocationCode.Decode("6789CF00+").LongitudeWidth, 0);
+            Assert.AreEqual(0.05, OpenLocationCode.Decode("6789CF00+").LatitudeHeight, 0);
+            Assert.AreEqual(0.0025, OpenLocationCode.Decode("6789CFGH+").LongitudeWidth, 0);
+            Assert.AreEqual(0.0025, OpenLocationCode.Decode("6789CFGH+").LatitudeHeight, 0);
+            Assert.AreEqual(0.000125, OpenLocationCode.Decode("6789CFGH+JM").LongitudeWidth, 0);
+            Assert.AreEqual(0.000125, OpenLocationCode.Decode("6789CFGH+JM").LatitudeHeight, 0);
+            Assert.AreEqual(0.00003125, OpenLocationCode.Decode("6789CFGH+JMP").LongitudeWidth, 0);
+            Assert.AreEqual(0.000025, OpenLocationCode.Decode("6789CFGH+JMP").LatitudeHeight, 0);
+
+
         }
 
         private bool IsNear(double a, double b) {

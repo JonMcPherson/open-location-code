@@ -9,7 +9,7 @@ namespace Google.OpenLocationCode {
     public class CodeArea {
 
         public CodeArea(double southLatitude, double westLongitude, double northLatitude, double eastLongitude) :
-            this(new GeoCoord(westLongitude, southLatitude), new GeoCoord(eastLongitude, northLatitude)) { }
+            this(new GeoCoord(southLatitude, westLongitude), new GeoCoord(northLatitude, eastLongitude)) { }
 
         public CodeArea(GeoCoord min, GeoCoord max) {
             if (min.Longitude >= max.Longitude || min.Latitude >= max.Latitude) {
@@ -26,8 +26,8 @@ namespace Google.OpenLocationCode {
         public GeoCoord Max { get; }
 
         public GeoCoord Center => new GeoCoord(
-            (double) (((decimal) Min.Longitude + (decimal) Max.Longitude) / 2),
-            (double) (((decimal) Min.Latitude + (decimal) Max.Latitude) / 2)
+            (Min.Latitude + Max.Latitude) / 2,
+            (Min.Longitude + Max.Longitude) / 2
         );
 
         public double LongitudeWidth => (double) ((decimal) Max.Longitude - (decimal) Min.Longitude);

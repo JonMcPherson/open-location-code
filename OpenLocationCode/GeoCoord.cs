@@ -2,18 +2,17 @@ using System;
 namespace Google.OpenLocationCode {
     public struct GeoCoord : IEquatable<GeoCoord> {
 
-        // [long, lat] to be consistent with [x, y] coordinate representation
-        public GeoCoord(double longitude, double latitude) {
-            if (longitude < -180 || longitude > 180) throw new ArgumentException("longitude is out of range -180 to 180");
+        public GeoCoord(double latitude, double longitude) {
             if (latitude < -90 || latitude > 90) throw new ArgumentException("latitude is out of range -90 to 90");
+            if (longitude < -180 || longitude > 180) throw new ArgumentException("longitude is out of range -180 to 180");
 
-            Longitude = longitude;
             Latitude = latitude;
+            Longitude = longitude;
         }
 
-        public double Longitude { get; }
-
         public double Latitude { get; }
+
+        public double Longitude { get; }
 
 
         public override string ToString() => $"[Longitude:{Longitude},Latitude:{Latitude}]";

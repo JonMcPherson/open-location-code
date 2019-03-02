@@ -2,16 +2,16 @@
 
 namespace Google.OpenLocationCode {
     /// <summary>
-    /// Coordinates of a decoded Open Location Code.
+    /// Coordinates of a decoded Open Location Code area.
     /// The coordinates include the latitude and longitude of the lower left and upper right corners
-    /// and the center of the bounding box for the area the code represents.
+    /// and the center of the bounding box of the code area.
     /// </summary>
     public class CodeArea {
 
         public CodeArea(double southLatitude, double westLongitude, double northLatitude, double eastLongitude) :
-            this(new GeoCoord(southLatitude, westLongitude), new GeoCoord(northLatitude, eastLongitude)) { }
+            this(new GeoPoint(southLatitude, westLongitude), new GeoPoint(northLatitude, eastLongitude)) { }
 
-        public CodeArea(GeoCoord min, GeoCoord max) {
+        public CodeArea(GeoPoint min, GeoPoint max) {
             if (min.Longitude >= max.Longitude || min.Latitude >= max.Latitude) {
                 throw new ArgumentException("min must be less than max");
             }
@@ -21,11 +21,11 @@ namespace Google.OpenLocationCode {
         }
 
 
-        public GeoCoord Min { get; }
+        public GeoPoint Min { get; }
 
-        public GeoCoord Max { get; }
+        public GeoPoint Max { get; }
 
-        public GeoCoord Center => new GeoCoord(
+        public GeoPoint Center => new GeoPoint(
             (Min.Latitude + Max.Latitude) / 2,
             (Min.Longitude + Max.Longitude) / 2
         );
@@ -48,7 +48,7 @@ namespace Google.OpenLocationCode {
         public double CenterLongitude => Center.Longitude;
 
 
-        public bool Contains(GeoCoord coordinates) {
+        public bool Contains(GeoPoint coordinates) {
             return Contains(coordinates.Longitude, coordinates.Latitude);
         }
 

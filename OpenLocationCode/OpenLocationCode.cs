@@ -172,7 +172,7 @@ namespace Google.OpenLocationCode {
         /// </summary>
         /// <param name="coordinates">The geographic coordinates.</param>
         /// <param name="codeLength">The desired number of digits in the code.</param>
-        public OpenLocationCode(GeoCoord coordinates, int codeLength) :
+        public OpenLocationCode(GeoPoint coordinates, int codeLength) :
             this(coordinates.Latitude, coordinates.Longitude, codeLength) { }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace Google.OpenLocationCode {
         /// Creates Open Location Code with the default precision length of 10.
         /// </summary>
         /// <param name="coordinates">The geographic coordinates.</param>
-        public OpenLocationCode(GeoCoord coordinates) : this(coordinates.Latitude, coordinates.Longitude) { }
+        public OpenLocationCode(GeoPoint coordinates) : this(coordinates.Latitude, coordinates.Longitude) { }
 
         // Used internally for codes which are guaranteed to be valid
         internal OpenLocationCode(char[] codeChars) {
@@ -370,7 +370,7 @@ namespace Google.OpenLocationCode {
                 throw new InvalidOperationException("Shorten() method can not be called on a padded code.");
             }
 
-            GeoCoord center = Decode().Center;
+            GeoPoint center = Decode().Center;
             double range = Math.Max(
                 Math.Abs(referenceLatitude - center.Latitude),
                 Math.Abs(referenceLongitude - center.Longitude)
@@ -412,7 +412,7 @@ namespace Google.OpenLocationCode {
                 new OpenLocationCode(referenceLatitude, referenceLongitude).Code.Substring(0, digitsToRecover);
             // Combine the prefix with the short code and decode it.
             OpenLocationCode recovered = new OpenLocationCode(recoveredPrefix + Code);
-            GeoCoord recoveredCodeAreaCenter = recovered.Decode().Center;
+            GeoPoint recoveredCodeAreaCenter = recovered.Decode().Center;
             // Work out whether the new code area is too far from the reference location. If it is, we
             // move it. It can only be out by a single precision step.
             double recoveredLatitude = recoveredCodeAreaCenter.Latitude;

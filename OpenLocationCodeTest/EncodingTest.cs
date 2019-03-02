@@ -18,7 +18,7 @@ public static class EncodingTest {
         new TestData("22222222+22", -89.9999375, -179.9999375, -90.0, -180.0, -89.999875, -179.999875),
         new TestData("6VGX0000+", 0.5, 179.5, 0, 179, 1, 180),
         new TestData("6FH32222+222", 1, 1, 1, 1, 1.000025, 1.00003125),
-        // Special cases over 90 latitude and 180 longitude),
+        // Special cases over 90 latitude and 180 longitude
         new TestData("CFX30000+", 90, 1, 89, 1, 90, 2),
         new TestData("CFX30000+", 92, 1, 89, 1, 90, 2),
         new TestData("62H20000+", 1, 180, 1, -180, 2, -179),
@@ -34,8 +34,8 @@ public static class EncodingTest {
                 if (testData.Code.Contains("0")) {
                     codeLength = testData.Code.IndexOf("0");
                 }
-                Assert.AreEqual(testData.Code, OpenLocationCode.Encode(testData.Lat, testData.Lon, codeLength),
-                    $"Latitude {testData.Lat} and longitude {testData.Lon} were wrongly encoded.");
+                Assert.AreEqual(testData.Code, OpenLocationCode.Encode(testData.EncodedLatitude, testData.EncodedLongitude, codeLength),
+                    $"Latitude {testData.EncodedLatitude} and longitude {testData.EncodedLongitude} were wrongly encoded.");
             }
         }
 
@@ -64,18 +64,20 @@ public static class EncodingTest {
 
     public class TheDecodeMethod {
         [Test]
-        public void ShouldDecodeLocationCodeToExpectedCodeArea() {
+        public void ShouldDecodeLocationCodesToExpectedCodeArea() {
             foreach (var testData in TestDataList) {
                 var decoded = OpenLocationCode.Decode(testData.Code);
 
-                Assert.True(IsNear(testData.DecodedLatLo, decoded.SouthLatitude),
-                    $"Wrong low latitude for code {testData.Code}");
-                Assert.True(IsNear(testData.DecodedLatHi, decoded.NorthLatitude),
-                    $"Wrong high latitude for code {testData.Code}");
-                Assert.True(IsNear(testData.DecodedLonLo, decoded.WestLongitude),
-                    $"Wrong low longitude for code {testData.Code}");
-                Assert.True(IsNear(testData.DecodedLonHi, decoded.EastLongitude),
-                    $"Wrong high longitude for code {testData.Code}");
+                AssertExpectedDecodedArea(testData, decoded);
+            }
+        }
+
+        [Test]
+        public void ShouldDecodeLocationCodesWithLowercaseCharactersToExpectedCodeArea() {
+            foreach (var testData in TestDataList) {
+                var decoded = OpenLocationCode.Decode(testData.Code.ToLower());
+
+                AssertExpectedDecodedArea(testData, decoded);
             }
         }
 
@@ -111,34 +113,38 @@ public static class EncodingTest {
             Assert.AreEqual(0.000125, OpenLocationCode.Decode("6789CFGH+JM").LatitudeHeight, 0);
             Assert.AreEqual(0.00003125, OpenLocationCode.Decode("6789CFGH+JMP").LongitudeWidth, 0);
             Assert.AreEqual(0.000025, OpenLocationCode.Decode("6789CFGH+JMP").LatitudeHeight, 0);
-
-
         }
 
-        private bool IsNear(double a, double b) {
+
+        private static void AssertExpectedDecodedArea(TestData testData, CodeArea decodedArea) {
+            Assert.True(IsNear(testData.DecodedArea.SouthLatitude, decodedArea.SouthLatitude),
+                $"Wrong low latitude for code {testData.Code}");
+            Assert.True(IsNear(testData.DecodedArea.NorthLatitude, decodedArea.NorthLatitude),
+                $"Wrong high latitude for code {testData.Code}");
+            Assert.True(IsNear(testData.DecodedArea.WestLongitude, decodedArea.WestLongitude),
+                $"Wrong low longitude for code {testData.Code}");
+            Assert.True(IsNear(testData.DecodedArea.EastLongitude, decodedArea.EastLongitude),
+                $"Wrong high longitude for code {testData.Code}");
+        }
+
+        private static bool IsNear(double a, double b) {
             return Math.Abs(a - b) < 1e-10;
         }
     }
 
     private struct TestData {
 
-        internal TestData(string code, double lat, double lon, double decodedLatLo, double decodedLonLo, double decodedLatHi, double decodedLonHi) {
+        internal TestData(string code, double lat, double lon, double decodedMinLat, double decodedMinLon, double decodedMaxLat, double decodedMaxLon) {
             Code = code;
-            Lat = lat;
-            Lon = lon;
-            DecodedLatLo = decodedLatLo;
-            DecodedLonLo = decodedLonLo;
-            DecodedLatHi = decodedLatHi;
-            DecodedLonHi = decodedLonHi;
+            EncodedLatitude = lat;
+            EncodedLongitude = lon;
+            DecodedArea = new CodeArea(decodedMinLat, decodedMinLon, decodedMaxLat, decodedMaxLon);
         }
 
         internal string Code { get; }
-        internal double Lat { get; }
-        internal double Lon { get; }
-        internal double DecodedLatLo { get; }
-        internal double DecodedLatHi { get; }
-        internal double DecodedLonLo { get; }
-        internal double DecodedLonHi { get; }
+        internal double EncodedLatitude { get; }
+        internal double EncodedLongitude { get; }
+        internal CodeArea DecodedArea { get; }
 
     }
 }

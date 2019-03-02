@@ -73,9 +73,6 @@ namespace Google.OpenLocationCode {
         }
 
 
-        private readonly Lazy<CodeArea> _codeArea;
-
-
         /// <summary>
         /// Creates Open Location Code object for the provided code.
         /// </summary>
@@ -89,8 +86,6 @@ namespace Google.OpenLocationCode {
             if (!IsValidCodeUpperCase(Code)) {
                 throw new ArgumentException($"The provided code '{code}' is not a valid Open Location Code.");
             }
-
-            _codeArea = new Lazy<CodeArea>(() => DecodeValid(code));
         }
 
         /// <summary>
@@ -164,7 +159,6 @@ namespace Google.OpenLocationCode {
                 codeBuilder.Append(SeparatorCharacter);
             }
             Code = codeBuilder.ToString();
-            _codeArea = new Lazy<CodeArea>(() => DecodeValid(Code));
         }
 
         /// <summary>
@@ -191,7 +185,6 @@ namespace Google.OpenLocationCode {
         // Used internally for codes which are guaranteed to be valid
         internal OpenLocationCode(char[] codeChars) {
             Code = PadCode(new string(codeChars));
-            _codeArea = new Lazy<CodeArea>(() => DecodeValid(Code));
         }
 
 
@@ -237,14 +230,18 @@ namespace Google.OpenLocationCode {
             return new OpenLocationCode(code).Decode();
         }
 
-        // Decode() without any validity checks
-        private static CodeArea DecodeValid(string code) {
-            if (!IsCodeFull(code)) {
-                throw new InvalidOperationException($"Method Decode() could only be called on valid full codes, code was {code}.");
+        /// <summary>
+        /// Decodes this Open Location Code into CodeArea object encapsulating latitude/longitude bounding box.
+        /// </summary>
+        /// <returns>The decoded CodeArea for this Open Location Code.</returns>
+        /// <exception cref="InvalidOperationException">If this code is not full.</exception>
+        public CodeArea Decode() {
+            if (!IsFull()) {
+                throw new InvalidOperationException($"Method Decode() could only be called on valid full codes, code is {Code}.");
             }
             // Strip padding and separator characters out of the code.
-            string decoded = TrimCode(code);
-            int decodedCodeLength = Math.Min(decoded.Length, MaxCodeLength);
+            string code = TrimCode(Code);
+            int codeLength = Math.Min(code.Length, MaxCodeLength);
 
             int digit = 0;
             // The precisions are initially set to ENCODING_BASE^2 because they will be immediately divided.
@@ -255,19 +252,19 @@ namespace Google.OpenLocationCode {
             double westLongitude = 0;
 
             // Decode the digits.
-            while (digit < decodedCodeLength) {
+            while (digit < codeLength) {
                 if (digit < PairCodeLength) {
                     // Decode a pair of digits, the first being latitude and the second being longitude.
                     latPrecision /= EncodingBase;
                     lngPrecision /= EncodingBase;
-                    int digitVal = DigitValueOf(decoded[digit]);
+                    int digitVal = DigitValueOf(code[digit]);
                     southLatitude += latPrecision * digitVal;
-                    digitVal = DigitValueOf(decoded[digit + 1]);
+                    digitVal = DigitValueOf(code[digit + 1]);
                     westLongitude += lngPrecision * digitVal;
                     digit += 2;
                 } else {
                     // Use the 4x5 grid for digits after 10.
-                    int digitVal = DigitValueOf(decoded[digit]);
+                    int digitVal = DigitValueOf(code[digit]);
                     int row = digitVal / RefinementGridColumns;
                     int col = digitVal % RefinementGridColumns;
                     latPrecision /= RefinementGridRows;
@@ -284,13 +281,6 @@ namespace Google.OpenLocationCode {
                 (westLongitude - LongitudeMax) + lngPrecision
             );
         }
-
-        /// <summary>
-        /// Decodes this Open Location Code into CodeArea object encapsulating latitude/longitude bounding box.
-        /// </summary>
-        /// <returns>The decoded CodeArea for this Open Location Code.</returns>
-        /// <exception cref="InvalidOperationException">If this code is not full.</exception>
-        public CodeArea Decode() => _codeArea.Value;
 
 
         /// <returns><c>true</c>, if this Open Location Code is full, <c>false</c> otherwise.</returns>

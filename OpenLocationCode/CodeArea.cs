@@ -25,10 +25,7 @@ namespace Google.OpenLocationCode {
 
         public GeoPoint Max { get; }
 
-        public GeoPoint Center => new GeoPoint(
-            (Min.Latitude + Max.Latitude) / 2,
-            (Min.Longitude + Max.Longitude) / 2
-        );
+        public GeoPoint Center => new GeoPoint(CenterLatitude, CenterLongitude);
 
         public double LongitudeWidth => (double) ((decimal) Max.Longitude - (decimal) Min.Longitude);
 
@@ -43,9 +40,9 @@ namespace Google.OpenLocationCode {
 
         public double EastLongitude => Max.Longitude;
 
-        public double CenterLatitude => Center.Latitude;
+        public double CenterLatitude => (Min.Latitude + Max.Latitude) / 2;
 
-        public double CenterLongitude => Center.Longitude;
+        public double CenterLongitude => (Min.Longitude + Max.Longitude) / 2;
 
 
         public bool Contains(GeoPoint coordinates) {

@@ -7,7 +7,8 @@
     <authors>Jon McPherson</authors>
     <owners>JonMcPherson</owners>
     <licenseUrl>https://github.com/google/open-location-code/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/JonMcPherson/open-location-code</projectUrl>
+    <projectUrl>https://plus.codes/</projectUrl>
+    <repository type="git" url="https://github.com/JonMcPherson/open-location-code" />
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The C# (.NET Standard) implementation of the Google Open Location Code API.</description>
     <tags>OLC google open location code plus codes latitude longitude encode decode</tags>

@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>OpenLocationCode</id>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <title>OpenLocationCode</title>
     <authors>Jon McPherson</authors>
     <owners>JonMcPherson</owners>
@@ -10,7 +10,7 @@
     <projectUrl>https://github.com/JonMcPherson/open-location-code</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The C# (.NET Standard) implementation of the Google Open Location Code API.</description>
-    <tags>google open location code plus codes latitude longitude encode decode</tags>
+    <tags>OLC google open location code plus codes latitude longitude encode decode</tags>
     <dependencies>
       <group targetFramework=".NETStandard2.0" />
     </dependencies>

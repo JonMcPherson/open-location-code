@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using Google.OpenLocationCode;
-using Xunit;
+using NUnit.Framework;
 
 public static class ShorteningTest {
 
-    private static readonly List<TestData> testDataList = new List<TestData> {
+    private static readonly List<TestData> TestDataList = new List<TestData> {
         new TestData("9C3W9QCJ+2VX", 51.3701125, -1.217765625, "+2VX", "B"),
         // Adjust so we can't trim by 8 (+/- .000755)
         new TestData("9C3W9QCJ+2VX", 51.3708675, -1.217765625, "CJ+2VX", "B"),
@@ -34,42 +34,42 @@ public static class ShorteningTest {
     };
 
     public class TheShortenMethod {
-        [Fact]
+        [Test]
         public void ShouldShortenLongCodeToShortCodeFromReferencePoint() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 if (testData.TestType != "B" && testData.TestType != "S") {
                     continue;
                 }
                 OpenLocationCode olc = new OpenLocationCode(testData.Code);
                 OpenLocationCode shortened = olc.Shorten(testData.ReferenceLatitude, testData.ReferenceLongitude);
-                Assert.Equal(testData.ShortCode, shortened.Code);
+                Assert.AreEqual(testData.ShortCode, shortened.Code);
             }
         }
     }
 
     public class TheRecoverMethod {
-        [Fact]
+        [Test]
         public void ShouldRecoverShortCodeToLongCodeFromReferencePoint() {
-            foreach (var testData in testDataList) {
+            foreach (var testData in TestDataList) {
                 if (testData.TestType != "B" && testData.TestType != "R") {
                     continue;
                 }
                 OpenLocationCode olc = new OpenLocationCode(testData.ShortCode);
                 OpenLocationCode recovered = olc.Recover(testData.ReferenceLatitude, testData.ReferenceLongitude);
-                Assert.Equal(testData.Code, recovered.Code);
+                Assert.AreEqual(testData.Code, recovered.Code);
             }
         }
 
-        [Fact]
+        [Test]
         public void ShouldRecoverShortCodesNearSouthPole() {
             OpenLocationCode olc = new OpenLocationCode("XXXXXX+XX");
-            Assert.Equal("2CXXXXXX+XX", olc.Recover(-81.0, 0.0).Code);
+            Assert.AreEqual("2CXXXXXX+XX", olc.Recover(-81.0, 0.0).Code);
         }
 
-        [Fact]
+        [Test]
         public void ShouldRecoverShortCodesNearNorthPole() {
             OpenLocationCode olc = new OpenLocationCode("2222+22");
-            Assert.Equal("CFX22222+22", olc.Recover(89.6, 0.0).Code);
+            Assert.AreEqual("CFX22222+22", olc.Recover(89.6, 0.0).Code);
         }
     }
 

@@ -1,37 +1,58 @@
-﻿namespace Google.OpenLocationCode {
+﻿using System;
+
+namespace Google.OpenLocationCode {
     /// <summary>
-    /// Coordinates of a decoded Open Location Code.
+    /// Coordinates of a decoded Open Location Code area.
     /// The coordinates include the latitude and longitude of the lower left and upper right corners
-    /// and the center of the bounding box for the area the code represents.
+    /// and the center of the bounding box of the code area.
     /// </summary>
     public class CodeArea {
-        
-        public CodeArea(decimal southLatitude, decimal westLongitude, decimal northLatitude, decimal eastLongitude) {
-            SouthLatitude = (double) southLatitude;
-            WestLongitude = (double) westLongitude;
-            NorthLatitude = (double) northLatitude;
-            EastLongitude = (double) eastLongitude;
-            LatitudeHeight = (double) (northLatitude - southLatitude);
-            LongitudeWidth = (double) (eastLongitude - westLongitude);
-            CenterLatitude = (double) ((southLatitude + northLatitude) / 2);
-            CenterLongitude = (double) ((westLongitude + eastLongitude) / 2);
+
+        public CodeArea(double southLatitude, double westLongitude, double northLatitude, double eastLongitude) :
+            this(new GeoPoint(southLatitude, westLongitude), new GeoPoint(northLatitude, eastLongitude)) { }
+
+        public CodeArea(GeoPoint min, GeoPoint max) {
+            if (min.Longitude >= max.Longitude || min.Latitude >= max.Latitude) {
+                throw new ArgumentException("min must be less than max");
+            }
+
+            Min = min;
+            Max = max;
         }
 
-        public double SouthLatitude { get; }
 
-        public double WestLongitude { get; }
+        public GeoPoint Min { get; }
 
-        public double NorthLatitude { get; }
+        public GeoPoint Max { get; }
 
-        public double EastLongitude { get; }
+        public GeoPoint Center => new GeoPoint(CenterLatitude, CenterLongitude);
 
-        public double LatitudeHeight { get; }
+        public double LongitudeWidth => (double) ((decimal) Max.Longitude - (decimal) Min.Longitude);
 
-        public double LongitudeWidth { get; }
+        public double LatitudeHeight => (double) ((decimal) Max.Latitude - (decimal) Min.Latitude);
 
-        public double CenterLatitude { get; }
 
-        public double CenterLongitude { get; }
+        public double SouthLatitude => Min.Latitude;
+
+        public double WestLongitude => Min.Longitude;
+
+        public double NorthLatitude => Max.Latitude;
+
+        public double EastLongitude => Max.Longitude;
+
+        public double CenterLatitude => (Min.Latitude + Max.Latitude) / 2;
+
+        public double CenterLongitude => (Min.Longitude + Max.Longitude) / 2;
+
+
+        public bool Contains(GeoPoint coordinates) {
+            return Contains(coordinates.Longitude, coordinates.Latitude);
+        }
+
+        public bool Contains(double longitude, double latitude) {
+            return Min.Longitude <= longitude && longitude < Max.Longitude
+                && Min.Latitude <= latitude && latitude < Max.Latitude;
+        }
 
     }
 }

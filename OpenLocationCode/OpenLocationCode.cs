@@ -563,10 +563,13 @@ namespace Google.OpenLocationCode {
         }
 
         /// <summary>
-        /// This will simply append padding '0' characters and append or insert the separator '+' character if necessary.
+        /// Pad a location code by applying the padding '0' and separator '+' characters that are necessary to form a valid location code.
+        /// If the given code is already padded, it will be returned as-is.
         /// </summary>
-        /// <param name="code">The trimmed code to pad into a valid code</param>
-        /// <returns>A padded code from a trimmed code (without any validation)</returns>
+        /// <remarks>
+        /// This will not do any validation of the provided code and will simply append or insert the characters if missing.
+        /// </remarks>
+        /// <param name="code">The code to pad</param>
         public static string PadCode(string code) {
             if (code.Length < SeparatorPosition) {
                 return code + new string(PaddingCharacter, SeparatorPosition - code.Length) + SeparatorCharacter;
@@ -579,10 +582,13 @@ namespace Google.OpenLocationCode {
         }
 
         /// <summary>
-        /// Trim or strip unnecessary characters from a location code. simply by removing any padding '0' and separator '+' characters.
+        /// Trim a location code by removing any padding '0' and separator '+' characters that are unnecessary to represent a location code.
+        /// If the code is already trimmed, it will be returned as-is.
         /// </summary>
+        /// <remarks>
+        /// This will not do any validation of the provided code and will simply strip the characters if they exist.
+        /// </remarks>
         /// <param name="code">the code to trim</param>
-        /// <returns>A trimmed code from a padded code (without any validation)</returns>
         public static string TrimCode(string code) {
             StringBuilder codeBuilder = new StringBuilder();
             foreach (char c in code) {
@@ -590,7 +596,7 @@ namespace Google.OpenLocationCode {
                     codeBuilder.Append(c);
                 }
             }
-            return codeBuilder.ToString();
+            return codeBuilder.Length != code.Length ? codeBuilder.ToString() : code;
         }
 
         // Private static methods.

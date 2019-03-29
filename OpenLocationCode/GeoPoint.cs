@@ -1,11 +1,12 @@
 using System;
+
 namespace Google.OpenLocationCode {
     /// <summary>
-    /// A point on the three-dimensional geographic coordinate system specified by latitude and longigtude coordinates in degrees.
+    /// A point on the three-dimensional geographic coordinate system specified by latitude and longitude coordinates in degrees.
     /// </summary>
     public struct GeoPoint : IEquatable<GeoPoint> {
 
-        /// <param name="latitude">The latitude coodinate in degrees</param>
+        /// <param name="latitude">The latitude coordinate in degrees</param>
         /// <param name="longitude">The longitude coordinate in degrees</param>
         /// <exception cref="ArgumentException">If latitude is out of range -90 to 90</exception>
         /// <exception cref="ArgumentException">If longitude is out of range -180 to 180</exception>

@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using Google.OpenLocationCode;
 using NUnit.Framework;
 
 public static class ShorteningTest {
 
+    // Test cases for shortening full codes and recovering short codes.
+    // test_type is R for recovery only, S for shorten only, or B for both.
+    // See: https://github.com/google/open-location-code/blob/master/test_data/shortCodeTests.csv
     private static readonly List<TestData> TestDataList = new List<TestData> {
         new TestData("9C3W9QCJ+2VX", 51.3701125, -1.217765625, "+2VX", "B"),
         // Adjust so we can't trim by 8 (+/- .000755)
@@ -35,41 +39,61 @@ public static class ShorteningTest {
 
     public class TheShortenMethod {
         [Test]
-        public void ShouldShortenLongCodeToShortCodeFromReferencePoint() {
+        public void ShouldShortenFullCodeToShortCodeFromReferencePoint() {
             foreach (var testData in TestDataList) {
                 if (testData.TestType != "B" && testData.TestType != "S") {
                     continue;
                 }
-                OpenLocationCode olc = new OpenLocationCode(testData.Code);
-                OpenLocationCode shortened = olc.Shorten(testData.ReferenceLatitude, testData.ReferenceLongitude);
-                Assert.AreEqual(testData.ShortCode, shortened.Code);
+
+                OpenLocationCode.ShortCode shortened = OpenLocationCode.Shorten(testData.Code,
+                    testData.ReferenceLatitude, testData.ReferenceLongitude);
+                Assert.AreEqual(testData.ShortCode, shortened.Code,
+                    $"Wrong shortening of code {testData.Code} from reference latitude {testData.ReferenceLatitude} and longitude {testData.ReferenceLongitude}.");
+            }
+        }
+
+        [Test]
+        public void ShouldThrowArgumentExceptionForInvalidOrShortOrPaddedCodes() {
+            foreach (string code in new[] { null, "INVALID", "2222+22", "9C3W9Q00+" }) {
+                Assert.Throws<ArgumentException>(() => OpenLocationCode.Shorten(code, 0, 0),
+                    $"Expected exception was not thrown for code {code}");
             }
         }
     }
 
-    public class TheRecoverMethod {
+    public class TheRecoverNearestMethod {
         [Test]
         public void ShouldRecoverShortCodeToLongCodeFromReferencePoint() {
             foreach (var testData in TestDataList) {
                 if (testData.TestType != "B" && testData.TestType != "R") {
                     continue;
                 }
-                OpenLocationCode olc = new OpenLocationCode(testData.ShortCode);
-                OpenLocationCode recovered = olc.Recover(testData.ReferenceLatitude, testData.ReferenceLongitude);
-                Assert.AreEqual(testData.Code, recovered.Code);
+                OpenLocationCode recovered = OpenLocationCode.ShortCode.RecoverNearest(testData.ShortCode,
+                    testData.ReferenceLatitude, testData.ReferenceLongitude);
+                Assert.AreEqual(testData.Code, recovered.Code,
+                    $"Wrong recovery of short code {testData.ShortCode} from reference latitude {testData.ReferenceLatitude} and longitude {testData.ReferenceLongitude}.");
             }
         }
 
         [Test]
         public void ShouldRecoverShortCodesNearSouthPole() {
-            OpenLocationCode olc = new OpenLocationCode("XXXXXX+XX");
-            Assert.AreEqual("2CXXXXXX+XX", olc.Recover(-81.0, 0.0).Code);
+            Assert.AreEqual("2CXXXXXX+XX", OpenLocationCode.ShortCode.RecoverNearest("XXXXXX+XX", - 81.0, 0.0).Code);
         }
 
         [Test]
         public void ShouldRecoverShortCodesNearNorthPole() {
-            OpenLocationCode olc = new OpenLocationCode("2222+22");
-            Assert.AreEqual("CFX22222+22", olc.Recover(89.6, 0.0).Code);
+            Assert.AreEqual("CFX22222+22", OpenLocationCode.ShortCode.RecoverNearest("2222+22", 89.6, 0.0).Code);
+        }
+    }
+
+    public class TheShortCodeConstructor {
+        [Test]
+        public void ShouldThrowArgumentExceptionForInvalidShortCodes() {
+            // TODO add "3W9Q00+" once the spec defines if short codes with padding are invalid
+            foreach (string code in new []{ null, "INVALID", "9C3W9Q00+", "9C3W9QCJ+2VX" }) {
+                Assert.Throws<ArgumentException>(() => new OpenLocationCode.ShortCode(code),
+                    $"Expected exception not thrown for code {code}");
+            }
         }
     }
 

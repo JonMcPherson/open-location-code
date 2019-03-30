@@ -6,8 +6,8 @@ namespace Google.OpenLocationCode {
     /// </summary>
     public struct GeoPoint : IEquatable<GeoPoint> {
 
-        /// <param name="latitude">The latitude coordinate in degrees</param>
-        /// <param name="longitude">The longitude coordinate in degrees</param>
+        /// <param name="latitude">The latitude coordinate in decimal degrees</param>
+        /// <param name="longitude">The longitude coordinate in decimal degrees</param>
         /// <exception cref="ArgumentException">If latitude is out of range -90 to 90</exception>
         /// <exception cref="ArgumentException">If longitude is out of range -180 to 180</exception>
         public GeoPoint(double latitude, double longitude) {
@@ -19,12 +19,12 @@ namespace Google.OpenLocationCode {
         }
 
         /// <summary>
-        /// The latitude coordinate in degrees (y axis)
+        /// The latitude coordinate in decimal degrees (y axis)
         /// </summary>
         public double Latitude { get; }
 
         /// <summary>
-        /// The longitude coordinate in degrees (x axis)
+        /// The longitude coordinate in decimal degrees (x axis)
         /// </summary>
         public double Longitude { get; }
 

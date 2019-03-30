@@ -149,12 +149,6 @@ namespace Google.OpenLocationCode {
         public OpenLocationCode(GeoPoint coordinates, int codeLength = CodePrecisionNormal) :
             this(coordinates.Latitude, coordinates.Longitude, codeLength) { }
 
-        // Used internally for codes which are guaranteed to be valid
-        internal OpenLocationCode(char[] codeDigits) {
-            CodeDigits = new string(codeDigits);
-            Code = NormalizeCode(CodeDigits);
-        }
-
 
         /// <summary>
         /// The code which is a valid full Open Location Code (plus code)

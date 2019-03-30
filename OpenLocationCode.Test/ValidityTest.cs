@@ -31,10 +31,7 @@ public static class ValidityTest {
         InvalidCode("8FWC2300+00"),
         InvalidCode("WC2300+G6g"),
         InvalidCode("WC2345+G"),
-        // TODO validate short codes with padding once a decision on this issue is made
-        // https://github.com/google/open-location-code/issues/273
-        //InvalidCode("WCX400+"),
-        //InvalidCode("WC0000+")
+        InvalidCode("WC2300+")
     };
 
 

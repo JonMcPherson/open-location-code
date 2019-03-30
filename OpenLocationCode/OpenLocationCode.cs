@@ -279,20 +279,19 @@ namespace Google.OpenLocationCode {
                     if (code[i] != PaddingCharacter) {
                         return false;
                     }
-                    continue;
-                }
-                if (CodeAlphabet.IndexOf(code[i]) != -1) {
-                    continue;
-                }
-                if (PaddingCharacter == code[i]) {
+                } else if (code[i] == PaddingCharacter) {
                     paddingStarted = true;
+                    // Short codes cannot have padding
+                    if (separatorIndex < SeparatorPosition) {
+                        return false;
+                    }
                     // Padding can start on even character: 2, 4 or 6.
                     if (i != 2 && i != 4 && i != 6) {
                         return false;
                     }
-                    continue;
+                } else if (CodeAlphabet.IndexOf(code[i]) == -1) {
+                    return false; // Illegal character.
                 }
-                return false; // Illegal character.
             }
 
             // Check the characters after the separator.

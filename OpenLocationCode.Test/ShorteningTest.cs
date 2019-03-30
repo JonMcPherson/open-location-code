@@ -89,8 +89,7 @@ public static class ShorteningTest {
     public class TheShortCodeConstructor {
         [Test]
         public void ShouldThrowArgumentExceptionForInvalidShortCodes() {
-            // TODO add "3W9Q00+" once the spec defines if short codes with padding are invalid
-            foreach (string code in new []{ null, "INVALID", "9C3W9Q00+", "9C3W9QCJ+2VX" }) {
+            foreach (string code in new []{ null, "INVALID", "3W9Q00+", "9C3W9Q00+", "9C3W9QCJ+2VX" }) {
                 Assert.Throws<ArgumentException>(() => new OpenLocationCode.ShortCode(code),
                     $"Expected exception not thrown for code {code}");
             }

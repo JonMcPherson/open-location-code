@@ -745,8 +745,7 @@ namespace Google.OpenLocationCode {
                     recoveredLatitude += prefixPrecision;
                 }
 
-                // Move the recovered longitude by one precision up or down if it is too far from the
-                // reference.
+                // Move the recovered longitude by one precision up or down if it is too far from the reference.
                 double longitudeDiff = recoveredCodeAreaCenter.Longitude - referenceLongitude;
                 if (longitudeDiff > prefixPrecision / 2) {
                     recoveredLongitude -= prefixPrecision;

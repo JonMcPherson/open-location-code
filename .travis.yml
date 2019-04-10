@@ -1,7 +1,7 @@
 language: csharp
 solution: OpenLocationCode.sln
 install:
-  - nuget restore solution-name.sln
+  - nuget restore OpenLocationCode.sln
   - nuget install NUnit.Console -Version 3.10.0 -OutputDirectory testrunner
 script:
   - msbuild /p:Configuration=Release OpenLocationCode.sln

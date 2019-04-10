@@ -4,13 +4,13 @@ using System.Text;
 namespace Google.OpenLocationCode {
     /// <summary>
     /// Convert locations to and from convenient codes known as Open Location Codes
-    /// or <see cref="https://plus.codes/">Plus Codes</see>
+    /// or <see href="https://plus.codes/">Plus Codes</see>
     /// <para>
     /// Open Location Codes are short, ~10 character codes that can be used instead of street
     /// addresses. The codes can be generated and decoded offline, and use a reduced character set that
     /// minimises the chance of codes including words.
     /// </para>
-    /// The <see cref="https://github.com/google/open-location-code/blob/master/API.txt">Open Location Code API</see>
+    /// The <see href="https://github.com/google/open-location-code/blob/master/API.txt">Open Location Code API</see>
     /// is implemented through the static methods:
     /// <list type="bullet">
     /// <item><see cref="IsValid(string)"/></item>
@@ -46,12 +46,14 @@ namespace Google.OpenLocationCode {
     public sealed class OpenLocationCode {
 
         /// <summary>
-        /// Provides a normal precision code, approximately 14x14 meters.
+        /// Provides a normal precision code, approximately 14x14 meters.<br/>
+        /// Used to specify encoded code length (<see cref="Encode(double,double,int)"/>)
         /// </summary>
         public const int CodePrecisionNormal = 10;
 
         /// <summary>
-        /// Provides an extra precision code, approximately 2x3 meters.
+        /// Provides an extra precision code length, approximately 2x3 meters.<br/>
+        /// Used to specify encoded code length (<see cref="Encode(double,double,int)"/>)
         /// </summary>
         public const int CodePrecisionExtra = 11;
 
@@ -102,7 +104,7 @@ namespace Google.OpenLocationCode {
         private static readonly int IndexedDigitValueOffset = CodeAlphabet[0]; // 50
 
         // The digit values indexed by the character ASCII integer for efficient lookup of a digit value by its character
-        private static readonly int[] IndexedDigitValues = new int[(CodeAlphabet[CodeAlphabet.Length - 1] - IndexedDigitValueOffset) + 1]; // int[38]
+        private static readonly int[] IndexedDigitValues = new int[CodeAlphabet[CodeAlphabet.Length - 1] - IndexedDigitValueOffset + 1]; // int[38]
 
         static OpenLocationCode() {
             for (int i = 0, digitVal = 0; i < IndexedDigitValues.Length; i++) {
@@ -130,28 +132,32 @@ namespace Google.OpenLocationCode {
         }
 
         /// <summary>
-        /// Creates an <see cref="OpenLocationCode"/> object encoded from the provided point coordinates.
+        /// Creates an <see cref="OpenLocationCode"/> object encoded from the provided latitude/longitude coordinates
+        /// and having the provided code length (precision).
         /// </summary>
         /// <param name="latitude">The latitude coordinate in decimal degrees.</param>
         /// <param name="longitude">The longitude coordinate in decimal degrees.</param>
         /// <param name="codeLength">The number of digits in the code (Default: <see cref="CodePrecisionNormal"/>).</param>
-        /// <exception cref="ArgumentException">If the code length is not valid.</exception>
+        /// <exception cref="ArgumentException">If the code length is invalid (valid lengths: <c>4</c>, <c>6</c>, <c>8</c>, or <c>10+</c>).</exception>
         public OpenLocationCode(double latitude, double longitude, int codeLength = CodePrecisionNormal) {
             Code = Encode(latitude, longitude, codeLength);
             CodeDigits = TrimCode(Code);
         }
 
         /// <summary>
-        /// Creates an <see cref="OpenLocationCode"/> object encoded from the provided point coordinates.
+        /// Creates an <see cref="OpenLocationCode"/> object encoded from the provided geographic point coordinates
+        /// with the provided code length.
         /// </summary>
-        /// <param name="coordinates">The geographic coordinates.</param>
+        /// <param name="point">The geographic coordinate point.</param>
         /// <param name="codeLength">The desired number of digits in the code (Default: <see cref="CodePrecisionNormal"/>).</param>
-        public OpenLocationCode(GeoPoint coordinates, int codeLength = CodePrecisionNormal) :
-            this(coordinates.Latitude, coordinates.Longitude, codeLength) { }
+        /// /// <exception cref="ArgumentException">If the code length is not valid.</exception>
+        /// <remarks>Alternative to <see cref="OpenLocationCode(double, double, int)"/></remarks>
+        public OpenLocationCode(GeoPoint point, int codeLength = CodePrecisionNormal) :
+            this(point.Latitude, point.Longitude, codeLength) { }
 
 
         /// <summary>
-        /// The code which is a valid full Open Location Code (plus code)
+        /// The code which is a valid full Open Location Code (plus code).
         /// </summary>
         /// <value>The string representation of the code.</value>
         public string Code { get; }
@@ -162,13 +168,14 @@ namespace Google.OpenLocationCode {
         /// since the code digits can be normalized back into a valid full code.
         /// </summary>
         /// <example>"8FWC2300+" -> "8FWC23", "8FWC2345+G6" -> "8FWC2345G6"</example>
-        /// <value>The string representation of the code digits</value>
+        /// <value>The string representation of the code digits.</value>
         /// <remarks>This is a nonstandard code format.</remarks>
         public string CodeDigits { get; }
 
 
         /// <summary>
-        /// Decodes this Open Location Code into CodeArea object encapsulating latitude/longitude bounding box.
+        /// Decodes this full Open Location Code into a <see cref="CodeArea"/> object
+        /// encapsulating the latitude/longitude coordinates of the area bounding box.
         /// </summary>
         /// <returns>The decoded CodeArea for this Open Location Code.</returns>
         public CodeArea Decode() {
@@ -177,7 +184,7 @@ namespace Google.OpenLocationCode {
 
 
         /// <summary>
-        /// Determines if this Open Location Code is padded which is defined by <see cref="IsPadded(string)"/>.
+        /// Determines if this full Open Location Code is padded which is defined by <see cref="IsPadded(string)"/>.
         /// </summary>
         /// <returns><c>true</c>, if this Open Location Code is a padded, <c>false</c> otherwise.</returns>
         public bool IsPadded() {
@@ -198,21 +205,24 @@ namespace Google.OpenLocationCode {
             return ShortenValid(Decode(), Code, referenceLatitude, referenceLongitude);
         }
 
-
-        /// <returns>Whether the bounding box specified by this Open Location Code contains provided point.</returns>
-        /// <remarks>Convenient alternative to Decode().Contains()</remarks>
-        /// <param name="latitude">The latitude in decimal degrees.</param>
-        /// <param name="longitude">The longitude in decimal degrees.</param>
-        public bool Contains(double latitude, double longitude) {
-            return Decode().Contains(longitude, latitude);
+        /// <summary>
+        /// Shorten this full Open Location Code by removing four or six digits (depending on the provided reference point).
+        /// It removes as many digits as possible.
+        /// </summary>
+        /// <returns>A new <see cref="ShortCode"/> instance shortened from this Open Location Code.</returns>
+        /// <param name="referencePoint">The reference point coordinates</param>
+        /// <exception cref="InvalidOperationException">If this code is padded (<see cref="IsPadded()"/>).</exception>
+        /// <exception cref="ArgumentException">If the reference point is too far from this code's center point.</exception>
+        /// <remarks>Convenient alternative to <see cref="Shorten(double, double)"/></remarks>
+        public ShortCode Shorten(GeoPoint referencePoint) {
+            return Shorten(referencePoint.Latitude, referencePoint.Longitude);
         }
 
 
+        /// <inheritdoc />
         /// <summary>
-        /// Determines whether the specified object is an OpenLocationCode with the same <see cref="Code"/> as this OpenLocationCode.
+        /// Determines whether the provided object is an OpenLocationCode with the same <see cref="Code"/> as this OpenLocationCode.
         /// </summary>
-        /// <param name="obj">The object to compare with this OpenLocationCode.</param>
-        /// <returns><c>true</c> if the specified object is equal to this OpenLocationCode, <c>false</c> otherwise.</returns>
         public override bool Equals(object obj) {
             return this == obj || (obj is OpenLocationCode olc && olc.Code == Code);
         }
@@ -352,11 +362,11 @@ namespace Google.OpenLocationCode {
         /// <para>
         /// An Open Location Code is padded when it has only 2, 4, or 6 valid digits
         /// followed by zero <c>'0'</c> as padding to form a full 8 digit code.
-        /// If this returns <c>true</c> that that the code is padded,
-        /// then it is also implied to be full since short codes cannot be padded.
+        /// If this returns <c>true</c> that the code is padded, then it is also implied
+        /// to be full since short codes cannot be padded.
         /// </para>
         /// </summary>
-        /// <returns><c>true</c>, if the provided code is a valid Open Location Code and is a padded, <c>false</c> otherwise.</returns>
+        /// <returns><c>true</c>, if the provided code is a valid padded Open Location Code, <c>false</c> otherwise.</returns>
         /// <param name="code">The code string to check.</param>
         /// <remarks>
         /// This is not apart of the API specification but it is useful to check if a code can
@@ -372,7 +382,7 @@ namespace Google.OpenLocationCode {
 
 
         /// <summary>
-        /// Encodes latitude/longitude into a full Open Location Code of the provided length.
+        /// Encodes latitude/longitude coordinates into a full Open Location Code of the provided length.
         /// </summary>
         /// <returns>The encoded Open Location Code.</returns>
         /// <param name="latitude">The latitude in decimal degrees.</param>
@@ -443,7 +453,20 @@ namespace Google.OpenLocationCode {
         }
 
         /// <summary>
-        /// Decodes an Open Location Code into CodeArea object encapsulating latitude/longitude bounding box.
+        /// Encodes geographic point coordinates into a full Open Location Code of the provided length.
+        /// </summary>
+        /// <returns>The encoded Open Location Code.</returns>
+        /// <param name="point">The geographic point coordinates.</param>
+        /// <param name="codeLength">The number of digits in the code (Default: <see cref="CodePrecisionNormal"/>).</param>
+        /// <exception cref="ArgumentException">If the code length is not valid.</exception>
+        /// <remarks>Alternative too <see cref="Encode(double, double, int)"/></remarks>
+        public static string Encode(GeoPoint point, int codeLength = CodePrecisionNormal) {
+            return Encode(point.Latitude, point.Longitude, codeLength);
+        }
+
+        /// <summary>
+        /// Decodes a full Open Location Code into a <see cref="CodeArea"/> object
+        /// encapsulating the latitude/longitude coordinates of the area bounding box.
         /// </summary>
         /// <returns>The decoded CodeArea for the given location code.</returns>
         /// <param name="code">The Open Location Code to be decoded.</param>
@@ -627,12 +650,12 @@ namespace Google.OpenLocationCode {
         /// or using the static method <see cref="RecoverNearest(string, double, double)"/> (as defined by the spec).
         /// </summary>
         public class ShortCode {
-        
+
             /// <summary>
             /// Creates a <see cref="ShortCode"/> object for the provided short Open Location Code.
             /// Use <see cref="OpenLocationCode(string)"/> for full codes.
             /// </summary>
-            /// <param name="shortCode">A valid short Open Location Code</param>
+            /// <param name="shortCode">A valid short Open Location Code.</param>
             /// <exception cref="ArgumentException">If the code is null, not valid, or not short.</exception>
             public ShortCode(string shortCode) {
                 Code = ValidateShortCode(shortCode);
@@ -645,7 +668,7 @@ namespace Google.OpenLocationCode {
             }
 
             /// <summary>
-            /// Gets the code which is a valid short Open Location Code (plus code)
+            /// The code which is a valid short Open Location Code (plus code).
             /// </summary>
             /// <example>9QCJ+2VX</example>
             /// <value>The string representation of the short code.</value>
@@ -663,14 +686,20 @@ namespace Google.OpenLocationCode {
             }
 
 
+            /// <inheritdoc />
+            /// <summary>
+            /// Determines whether the provided object is a ShortCode with the same <see cref="Code"/> as this ShortCode.
+            /// </summary>
             public override bool Equals(object obj) {
                 return obj == this || (obj is ShortCode shortCode && shortCode.Code == Code);
             }
 
+            /// <returns>The hashcode of the <see cref="Code"/> string.</returns>
             public override int GetHashCode() {
                 return Code.GetHashCode();
             }
 
+            /// <returns>The <see cref="Code"/> string.</returns>
             public override string ToString() {
                 return Code;
             }

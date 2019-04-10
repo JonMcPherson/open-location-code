@@ -102,15 +102,15 @@ public static class EncodingTest {
             foreach (var testData in TestDataList) {
                 var olc = new OpenLocationCode(testData.Code);
                 var decoded = olc.Decode();
-                Assert.True(olc.Contains(decoded.CenterLatitude, decoded.CenterLongitude),
+                Assert.True(decoded.Contains(decoded.CenterLatitude, decoded.CenterLongitude),
                     $"Containment relation is broken for the decoded middle point of code {testData.Code}");
-                Assert.True(olc.Contains(decoded.SouthLatitude, decoded.WestLongitude),
+                Assert.True(decoded.Contains(decoded.SouthLatitude, decoded.WestLongitude),
                     $"Containment relation is broken for the decoded bottom left corner of code {testData.Code}");
-                Assert.False(olc.Contains(decoded.NorthLatitude, decoded.EastLongitude),
+                Assert.False(decoded.Contains(decoded.NorthLatitude, decoded.EastLongitude),
                     $"Containment relation is broken for the decoded top right corner of code {testData.Code}");
-                Assert.False(olc.Contains(decoded.SouthLatitude, decoded.EastLongitude),
+                Assert.False(decoded.Contains(decoded.SouthLatitude, decoded.EastLongitude),
                     $"Containment relation is broken for the decoded bottom right corner of code {testData.Code}");
-                Assert.False(olc.Contains(decoded.NorthLatitude, decoded.WestLongitude),
+                Assert.False(decoded.Contains(decoded.NorthLatitude, decoded.WestLongitude),
                     $"Containment relation is broken for the decoded top left corner of code {testData.Code}");
             }
         }

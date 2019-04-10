@@ -12,6 +12,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>The C# (.NET Standard) implementation of the Google Open Location Code API.</description>
     <tags>OLC google open location code plus codes latitude longitude encode decode</tags>
+    <releaseNotes>See the pull request on Github: https://github.com/JonMcPherson/open-location-code/pull/7</releaseNotes>
     <dependencies>
       <group targetFramework=".NETStandard2.0" />
     </dependencies>

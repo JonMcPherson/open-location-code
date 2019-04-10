@@ -2,7 +2,7 @@
 
 > The C# (.NET Standard) implementation of the Google Open Location Code API ([google/open-location-code](https://github.com/google/open-location-code)).
 
-Convert locations to and from convenient codes known as Open Location Codes or Plus Codes
+Convert locations to and from convenient codes known as Open Location Codes or [Plus Codes](https://plus.codes/)
 
 Open Location Codes are short, ~10 character codes that can be used instead of street addresses. The codes can be generated and decoded offline, and use a reduced character set that minimises the chance of codes including words.
 

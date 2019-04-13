@@ -2,7 +2,8 @@ language: csharp
 solution: OpenLocationCode.sln
 install:
   - nuget restore OpenLocationCode.sln
+  - nuget install NUnit -Version 3.10.0 -OutputDirectory nunit
   - nuget install NUnit.Console -Version 3.10.0 -OutputDirectory testrunner
 script:
-  - msbuild /p:Configuration=Release OpenLocationCode.sln
+  - xbuild /p:Configuration=Release OpenLocationCode.sln
   - mono ./testrunner/NUnit.ConsoleRunner.3.10.0/tools/nunit3-console.exe ./OpenLocationCode.Test/bin/Release/netcoreapp2.0/OpenLocationCode.Test.dll

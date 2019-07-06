@@ -1,0 +1,33 @@
+﻿# Test data for validity tests.
+# Format of each line is:
+#   code,isValid,isShort,isFull,isPadded
+# Valid full codes:
+8FWC2345+G6,true,false,true,false
+8FWC2345+G6G,true,false,true,false
+8fwc2345+,true,false,true,false
+8FWCX400+,true,false,true,true
+8FWC0000+,true,false,true,true
+8F000000+,true,false,true,true
+# Valid short codes:
+WC2345+G6g,true,true,false,false
+2345+G6,true,true,false,false
+45+G6,true,true,false,false
++G6,true,true,false,false
+# Invalid codes
+G+,false,false,false,false
++,false,false,false,false
+8FWC2345+G,false,false,false,false
+8FWC2_45+G6,false,false,false,false
+8FWC2η45+G6,false,false,false,false
+8FWC2345+G6+,false,false,false,false
+8FWC2345G6+,false,false,false,false
+8FWC2300+G6,false,false,false,false
+WC2300+G6g,false,false,false,false
+WC2345+G,false,false,false,false
+WC2300+,false,false,false,false
+# Validate that codes at and exceeding 15 digits are still valid when all their
+# digits are valid, and invalid when not.
+849VGJQF+VX7QR3J,true,false,true,false
+849VGJQF+VX7QR3U,false,false,false,false
+849VGJQF+VX7QR3JW,true,false,true,false
+849VGJQF+VX7QR3JU,false,false,false,false

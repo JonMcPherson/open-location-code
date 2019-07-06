@@ -59,46 +59,70 @@ namespace Google.OpenLocationCode {
 
 
         // A separator used to break the code into two parts to aid memorability.
-        internal const char SeparatorCharacter = '+';
+        private const char SeparatorCharacter = '+';
 
         // The number of characters to place before the separator.
-        internal const int SeparatorPosition = 8;
+        private const int SeparatorPosition = 8;
 
         // The character used to pad codes.
-        internal const char PaddingCharacter = '0';
+        private const char PaddingCharacter = '0';
 
         // The character set used to encode the digit values.
         internal const string CodeAlphabet = "23456789CFGHJMPQRVWX";
 
         // The base to use to convert numbers to/from.
-        internal static readonly int EncodingBase = CodeAlphabet.Length;
+        private const int EncodingBase = 20; // CodeAlphabet.Length;
 
         // The encoding base squared also rep
-        internal static readonly int EncodingBaseSquared = EncodingBase * EncodingBase;
+        private const int EncodingBaseSquared = EncodingBase * EncodingBase;
 
         // The maximum value for latitude in degrees.
-        internal const int LatitudeMax = 90;
+        private const int LatitudeMax = 90;
 
         // The maximum value for longitude in degrees.
-        internal const int LongitudeMax = 180;
+        private const int LongitudeMax = 180;
 
         // Maximum code length using just lat/lng pair encoding.
-        internal const int PairCodeLength = 10;
+        private const int PairCodeLength = 10;
+
+        // Number of digits in the grid coding section.
+        private const int GridCodeLength = MaxDigitCount - PairCodeLength;
 
         // Maximum code length for any plus code
-        internal const int MaxCodeLength = 15;
+        private const int MaxDigitCount = 15;
 
         // Number of columns in the grid refinement method.
-        internal const int RefinementGridColumns = 4;
+        private const int GridColumns = 4;
 
         // Number of rows in the grid refinement method.
-        internal const int RefinementGridRows = 5;
+        private const int GridRows = 5;
 
         // The maximum latitude digit value for the first grid layer
-        internal const int FirstLatitudeDigitValueMax = 8; // lat -> 90
+        private const int FirstLatitudeDigitValueMax = 8; // lat -> 90
 
         // The maximum longitude digit value for the first grid layer
-        internal const int FirstLongitudeDigitValueMax = 17; // lon -> 180
+        private const int FirstLongitudeDigitValueMax = 17; // lon -> 180
+
+
+        private const long GridRowsMultiplier = 3125; // Pow(GridRows, GridCodeLength)
+
+        private const long GridColumnsMultiplier = 1024; // Pow(GridColumns, GridCodeLength)
+
+        // Value to multiple latitude degrees to convert it to an integer with the maximum encoding
+        // precision. I.e. ENCODING_BASE**3 * GRID_ROWS**GRID_CODE_LENGTH
+        private const long LatIntegerMultiplier = 8000 * GridRowsMultiplier;
+
+        // Value to multiple longitude degrees to convert it to an integer with the maximum encoding
+        // precision. I.e. ENCODING_BASE**3 * GRID_COLUMNS**GRID_CODE_LENGTH
+        private const long LngIntegerMultiplier = 8000 * GridColumnsMultiplier;
+
+        // Value of the most significant latitude digit after it has been converted to an integer.
+        private const long LatMspValue = LatIntegerMultiplier * EncodingBaseSquared;
+
+        // Value of the most significant longitude digit after it has been converted to an integer.
+        private const long LngMspValue = LngIntegerMultiplier * EncodingBaseSquared;
+
+
 
         // The ASCII integer of the minimum digit character used as the offset for indexed code digits
         private static readonly int IndexedDigitValueOffset = CodeAlphabet[0]; // 50
@@ -126,7 +150,7 @@ namespace Google.OpenLocationCode {
             }
             Code = NormalizeCode(code.ToUpper());
             if (!IsValidUpperCase(Code) || !IsCodeFull(Code)) {
-                throw new ArgumentException($"The provided code '{code}' is not a valid full Open Location Code (or code digits).");
+                throw new ArgumentException($"code '{code}' is not a valid full Open Location Code (or code digits).");
             }
             CodeDigits = TrimCode(Code);
         }
@@ -391,7 +415,7 @@ namespace Google.OpenLocationCode {
         /// <exception cref="ArgumentException">If the code length is not valid.</exception>
         public static string Encode(double latitude, double longitude, int codeLength = CodePrecisionNormal) {
             // Limit the maximum number of digits in the code.
-            codeLength = Math.Min(codeLength, MaxCodeLength);
+            codeLength = Math.Min(codeLength, MaxDigitCount);
             // Check that the code length requested is valid.
             if (codeLength < 4 || (codeLength < PairCodeLength && codeLength % 2 == 1)) {
                 throw new ArgumentException($"Illegal code length {codeLength}.");
@@ -402,54 +426,59 @@ namespace Google.OpenLocationCode {
 
             // Latitude 90 needs to be adjusted to be just less, so the returned code can also be decoded.
             if ((int) latitude == LatitudeMax) {
-                latitude = latitude - 0.9 * ComputeLatitudePrecision(codeLength);
+                latitude -= 0.9 * ComputeLatitudePrecision(codeLength);
             }
 
-            // Adjust latitude and longitude to be in positive number ranges.
-            double remainingLatitude = latitude + LatitudeMax;
-            double remainingLongitude = longitude + LongitudeMax;
+            // Store the code - we build it in reverse and reorder it afterwards.
+            StringBuilder reverseCodeBuilder = new StringBuilder();
 
-            // Count how many digits have been created.
-            int generatedDigits = 0;
-            // Store the code.
-            StringBuilder codeBuilder = new StringBuilder();
-            // The precisions are initially set to ENCODING_BASE^2 because they will be immediately divided.
-            double latPrecision = EncodingBaseSquared;
-            double lngPrecision = EncodingBaseSquared;
-            while (generatedDigits < codeLength) {
-                if (generatedDigits < PairCodeLength) {
-                    // Use the normal algorithm for the first set of digits.
-                    latPrecision /= EncodingBase;
-                    lngPrecision /= EncodingBase;
-                    int latDigit = (int) Math.Floor(remainingLatitude / latPrecision);
-                    int lngDigit = (int) Math.Floor(remainingLongitude / lngPrecision);
-                    remainingLatitude -= latPrecision * latDigit;
-                    remainingLongitude -= lngPrecision * lngDigit;
-                    codeBuilder.Append(CodeAlphabet[latDigit]);
-                    codeBuilder.Append(CodeAlphabet[lngDigit]);
-                    generatedDigits += 2;
-                } else {
-                    // Use the 4x5 grid for remaining digits.
-                    latPrecision /= RefinementGridRows;
-                    lngPrecision /= RefinementGridColumns;
-                    int row = (int) Math.Floor(remainingLatitude / latPrecision);
-                    int col = (int) Math.Floor(remainingLongitude / lngPrecision);
-                    remainingLatitude -= latPrecision * row;
-                    remainingLongitude -= lngPrecision * col;
-                    codeBuilder.Append(CodeAlphabet[row * RefinementGridColumns + col]);
-                    generatedDigits += 1;
+            // Compute the code.
+            // This approach converts each value to an integer after multiplying it by
+            // the final precision. This allows us to use only integer operations, so
+            // avoiding any accumulation of floating point representation errors.
+
+            // Multiply values by their precision and convert to positive. Rounding
+            // avoids/minimises errors due to floating point precision.
+            long latVal = (long) (Math.Round((latitude + LatitudeMax) * LatIntegerMultiplier * 1e6) / 1e6);
+            long lngVal = (long) (Math.Round((longitude + LongitudeMax) * LngIntegerMultiplier * 1e6) / 1e6);
+
+            if (codeLength > PairCodeLength) {
+                for (int i = 0; i < GridCodeLength; i++) {
+                    long latDigit = latVal % GridRows;
+                    long lngDigit = lngVal % GridColumns;
+                    int ndx = (int) (latDigit * GridColumns + lngDigit);
+                    reverseCodeBuilder.Append(CodeAlphabet[ndx]);
+                    latVal /= GridRows;
+                    lngVal /= GridColumns;
                 }
+            } else {
+                latVal /= GridRowsMultiplier;
+                lngVal /= GridColumnsMultiplier;
+            }
+            // Compute the pair section of the code.
+            for (int i = 0; i < PairCodeLength / 2; i++) {
+                reverseCodeBuilder.Append(CodeAlphabet[(int) (lngVal % EncodingBase)]);
+                reverseCodeBuilder.Append(CodeAlphabet[(int) (latVal % EncodingBase)]);
+                latVal /= EncodingBase;
+                lngVal /= EncodingBase;
                 // If we are at the separator position, add the separator.
-                if (generatedDigits == SeparatorPosition) {
-                    codeBuilder.Append(SeparatorCharacter);
+                if (i == 0) {
+                    reverseCodeBuilder.Append(SeparatorCharacter);
                 }
             }
-            // If the generated code is shorter than the separator position, pad the code and add the separator.
-            if (generatedDigits < SeparatorPosition) {
-                codeBuilder.Append(PaddingCharacter, SeparatorPosition - generatedDigits);
-                codeBuilder.Append(SeparatorCharacter);
+            // Reverse the code.
+            char[] reversedCode = reverseCodeBuilder.ToString().ToCharArray();
+            Array.Reverse(reversedCode);
+            StringBuilder codeBuilder = new StringBuilder(new string(reversedCode));
+
+            // If we need to pad the code, replace some of the digits.
+            if (codeLength < SeparatorPosition) {
+                codeBuilder.Remove(codeLength, SeparatorPosition - codeLength);
+                for (int i = codeLength; i < SeparatorPosition; i++) {
+                    codeBuilder.Insert(i, PaddingCharacter);
+                }
             }
-            return codeBuilder.ToString();
+            return codeBuilder.ToString(0, Math.Max(SeparatorPosition + 1, codeLength + 1));
         }
 
         /// <summary>
@@ -480,44 +509,36 @@ namespace Google.OpenLocationCode {
         }
 
         private static CodeArea DecodeValid(string codeDigits) {
-            int codeLength = Math.Min(codeDigits.Length, MaxCodeLength);
+            // Initialise the values. We work them out as integers and convert them to doubles at the end.
+            long latVal = -LatitudeMax * LatIntegerMultiplier;
+            long lngVal = -LongitudeMax * LngIntegerMultiplier;
+            // Define the place value for the digits. We'll divide this down as we work through the code.
+            long latPlaceVal = LatMspValue;
+            long lngPlaceVal = LngMspValue;
 
-            int digit = 0;
-            // The precisions are initially set to ENCODING_BASE^2 because they will be immediately divided.
-            double latPrecision = EncodingBaseSquared;
-            double lngPrecision = EncodingBaseSquared;
-            // Save the coordinates.
-            double southLatitude = 0;
-            double westLongitude = 0;
-
-            // Decode the digits.
-            while (digit < codeLength) {
-                if (digit < PairCodeLength) {
-                    // Decode a pair of digits, the first being latitude and the second being longitude.
-                    latPrecision /= EncodingBase;
-                    lngPrecision /= EncodingBase;
-                    int digitVal = DigitValueOf(codeDigits[digit]);
-                    southLatitude += latPrecision * digitVal;
-                    digitVal = DigitValueOf(codeDigits[digit + 1]);
-                    westLongitude += lngPrecision * digitVal;
-                    digit += 2;
-                } else {
-                    // Use the 4x5 grid for digits after 10.
-                    int digitVal = DigitValueOf(codeDigits[digit]);
-                    int row = digitVal / RefinementGridColumns;
-                    int col = digitVal % RefinementGridColumns;
-                    latPrecision /= RefinementGridRows;
-                    lngPrecision /= RefinementGridColumns;
-                    southLatitude += latPrecision * row;
-                    westLongitude += lngPrecision * col;
-                    digit += 1;
-                }
+            int pairPartLength = Math.Min(codeDigits.Length, PairCodeLength);
+            int codeLength = Math.Min(codeDigits.Length, MaxDigitCount);
+            for (int i = 0; i < pairPartLength; i += 2) {
+                latPlaceVal /= EncodingBase;
+                lngPlaceVal /= EncodingBase;
+                latVal += DigitValueOf(codeDigits[i]) * latPlaceVal;
+                lngVal += DigitValueOf(codeDigits[i + 1]) * lngPlaceVal;
+            }
+            for (int i = PairCodeLength; i < codeLength; i++) {
+                latPlaceVal /= GridRows;
+                lngPlaceVal /= GridColumns;
+                int digit = DigitValueOf(codeDigits[i]);
+                int row = digit / GridColumns;
+                int col = digit % GridColumns;
+                latVal += row * latPlaceVal;
+                lngVal += col * lngPlaceVal;
             }
             return new CodeArea(
-                southLatitude - LatitudeMax,
-                westLongitude - LongitudeMax,
-                (southLatitude - LatitudeMax) + latPrecision,
-                (westLongitude - LongitudeMax) + lngPrecision
+                (double)latVal / LatIntegerMultiplier,
+                (double)lngVal / LngIntegerMultiplier,
+                (double)(latVal + latPlaceVal) / LatIntegerMultiplier,
+                (double)(lngVal + lngPlaceVal) / LngIntegerMultiplier,
+                codeLength
             );
         }
 
@@ -586,10 +607,10 @@ namespace Google.OpenLocationCode {
 
         private static double NormalizeLongitude(double longitude) {
             while (longitude < -LongitudeMax) {
-                longitude = longitude + LongitudeMax * 2;
+                longitude += LongitudeMax * 2;
             }
             while (longitude >= LongitudeMax) {
-                longitude = longitude - LongitudeMax * 2;
+                longitude -= LongitudeMax * 2;
             }
             return longitude;
         }
@@ -633,7 +654,7 @@ namespace Google.OpenLocationCode {
             if (codeLength <= CodePrecisionNormal) {
                 return Math.Pow(EncodingBase, codeLength / -2 + 2);
             }
-            return Math.Pow(EncodingBase, -3) / Math.Pow(RefinementGridRows, codeLength - PairCodeLength);
+            return Math.Pow(EncodingBase, -3) / Math.Pow(GridRows, codeLength - PairCodeLength);
         }
 
 
@@ -658,7 +679,7 @@ namespace Google.OpenLocationCode {
             /// <param name="shortCode">A valid short Open Location Code.</param>
             /// <exception cref="ArgumentException">If the code is null, not valid, or not short.</exception>
             public ShortCode(string shortCode) {
-                Code = ValidateShortCode(shortCode);
+                Code = ValidateShortCode(ValidateCode(shortCode));
             }
 
             // Used internally for short codes which are guaranteed to be valid
@@ -705,6 +726,10 @@ namespace Google.OpenLocationCode {
             }
 
 
+            /// <remarks>
+            /// Note: if shortCode is already a valid full code,
+            /// this will immediately return a new OpenLocationCode instance with that code
+            /// </remarks>
             /// <returns>
             /// A new OpenLocationCode instance representing a full Open Location Code
             /// recovered from the provided short Open Location Code, given the reference location.
@@ -712,9 +737,12 @@ namespace Google.OpenLocationCode {
             /// <param name="shortCode">The valid short Open Location Code to recover</param>
             /// <param name="referenceLatitude">The reference latitude in decimal degrees.</param>
             /// <param name="referenceLongitude">The reference longitude in decimal degrees.</param>
-            /// <exception cref="ArgumentException">If the code is null, not valid, or not short.</exception>
+            /// <exception cref="ArgumentException">If the code is null or not valid.</exception>
             public static OpenLocationCode RecoverNearest(string shortCode, double referenceLatitude, double referenceLongitude) {
-                return RecoverNearestValid(ValidateShortCode(shortCode), referenceLatitude, referenceLongitude);
+                string validCode = ValidateCode(shortCode);
+                if (IsCodeFull(validCode)) return new OpenLocationCode(validCode);
+
+                return RecoverNearestValid(ValidateShortCode(validCode), referenceLatitude, referenceLongitude);
             }
 
             private static OpenLocationCode RecoverNearestValid(string shortCode, double referenceLatitude, double referenceLongitude) {
@@ -757,12 +785,8 @@ namespace Google.OpenLocationCode {
             }
 
             private static string ValidateShortCode(string shortCode) {
-                if (shortCode == null) {
-                    throw new ArgumentException("shortCode cannot be null");
-                }
-                shortCode = shortCode.ToUpper();
-                if (!IsValidUpperCase(shortCode) || !IsCodeShort(shortCode)) {
-                    throw new ArgumentException($"The provided code '{shortCode}' is not a valid short Open Location Code.");
+                if (!IsCodeShort(shortCode)) {
+                    throw new ArgumentException($"code '{shortCode}' is not a valid short Open Location Code.");
                 }
                 return shortCode;
             }

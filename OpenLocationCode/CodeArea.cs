@@ -2,7 +2,7 @@
 
 namespace Google.OpenLocationCode {
     /// <summary>
-    /// A square GeoArea for the coordinates of a decoded Open Location Code area.
+    /// A square <see cref="GeoArea"/> for the coordinates of a decoded Open Location Code area.
     /// The <see cref="CodeLength"/> of the decoded Open Location Code is also included.
     /// </summary>
     public class CodeArea : GeoArea {

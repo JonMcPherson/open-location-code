@@ -2,7 +2,7 @@
 
 namespace Google.OpenLocationCode {
     /// <summary>
-    /// A rectangular area on the geographic coordinate system specified by a minimum and maximum <see cref="GeoPoint"/> coordinates.
+    /// A rectangular area on the geographic coordinate system specified by the minimum and maximum <see cref="GeoPoint"/> coordinates.
     /// The coordinates include the latitude and longitude of the lower left (south west) and upper right (north east) corners.
     /// <para>
     /// Additional properties exist to calculate the <see cref="Center"/> of the bounding box,

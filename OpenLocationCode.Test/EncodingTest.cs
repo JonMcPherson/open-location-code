@@ -14,7 +14,7 @@ public static class EncodingTest {
         [Test]
         public void ShouldEncodePointToExpectedLocationCode() {
             foreach (var testData in EncodingTestCases) {
-                if(testData.Code.Length == 0) continue;
+                if (testData.Code.Length == 0) continue;
                 Assert.AreEqual(testData.Code, OpenLocationCode.Encode(testData.Latitude, testData.Longitude, testData.Length),
                     $"Latitude {testData.Latitude} and longitude {testData.Longitude} were wrongly encoded.");
             }
@@ -23,8 +23,8 @@ public static class EncodingTest {
         [Test]
         public void ShouldFailToEncode() {
             foreach (var testData in EncodingTestCases) {
-                if(testData.Code.Length != 0) continue;
-                Assert.Throws<System.ArgumentException>(delegate{OpenLocationCode.Encode(testData.Latitude, testData.Longitude, testData.Length);},
+                if (testData.Code.Length != 0) continue;
+                Assert.Throws<ArgumentException>(() => OpenLocationCode.Encode(testData.Latitude, testData.Longitude, testData.Length),
                     $"Latitude {testData.Latitude} and longitude {testData.Longitude} with length {testData.Length} should fail to encode.");
             }
         }
@@ -56,16 +56,17 @@ public static class EncodingTest {
         [Test]
         public void ShouldEncodePointToExpectedLocationCode() {
             foreach (var testData in EncodingTestCases) {
-                if(testData.Code.Length == 0) continue;
+                if (testData.Code.Length == 0) continue;
                 OpenLocationCode olc = new OpenLocationCode(testData.Latitude, testData.Longitude, testData.Length);
                 Assert.AreEqual(testData.Code, olc.Code,
                     $"Wrong code encoded for latitude {testData.Latitude} and longitude {testData.Longitude}.");
             }
         }
+
         [Test]
         public void ShouldTrimCodesIntoToExpectedCodeDigits() {
             foreach (var testData in EncodingTestCases) {
-                if(testData.Code.Length == 0) continue;
+                if (testData.Code.Length == 0) continue;
                 OpenLocationCode olc = new OpenLocationCode(testData.Latitude, testData.Longitude, testData.Length);
                 int expectedLength = Math.Min(testData.Length, 15);
                 Assert.AreEqual(expectedLength, olc.CodeDigits.Length,

@@ -417,7 +417,7 @@ namespace Google.OpenLocationCode {
             // Limit the maximum number of digits in the code.
             codeLength = Math.Min(codeLength, MaxDigitCount);
             // Check that the code length requested is valid.
-            if (codeLength < 4 || (codeLength < PairCodeLength && codeLength % 2 == 1)) {
+            if (codeLength < 2 || (codeLength < PairCodeLength && codeLength % 2 == 1)) {
                 throw new ArgumentException($"Illegal code length {codeLength}.");
             }
             // Ensure that latitude and longitude are valid.

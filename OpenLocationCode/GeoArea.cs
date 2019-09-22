@@ -36,6 +36,12 @@ namespace Google.OpenLocationCode {
             this(new GeoPoint(southLatitude, westLongitude), new GeoPoint(northLatitude, eastLongitude)) { }
 
         /// <summary>
+        /// Create a new copy of the provided GeoArea
+        /// </summary>
+        /// <param name="other">The other GeoArea to copy</param>
+        public GeoArea(GeoArea other) : this(other.Min, other.Max) { }
+
+        /// <summary>
         /// The min (south west) point coordinates of the area bounds.
         /// </summary>
         public GeoPoint Min { get; }

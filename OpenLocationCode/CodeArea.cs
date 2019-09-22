@@ -17,6 +17,14 @@ namespace Google.OpenLocationCode {
         }
 
         /// <summary>
+        /// Create a new copy of the provided CodeArea
+        /// </summary>
+        /// <param name="other">The other CodeArea to copy</param>
+        public CodeArea(CodeArea other) : base(other) {
+            CodeLength = other.CodeLength;
+        }
+
+        /// <summary>
         /// The length of the decoded Open Location Code.
         /// </summary>
         public int CodeLength { get; }
